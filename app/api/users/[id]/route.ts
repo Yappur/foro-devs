@@ -20,7 +20,7 @@ const userSchema = z.object({
 const getUser = async (id: string): Promise<User | null> => {
   const user = await prisma.user.findUnique({
     // findUnique es un método de Prisma que busca un registro único en la base de datos según el criterio especificado. En este caso, se busca un usuario con un id específico.
-    where: { id: parseInt(id) }, // Nuestro ID esta en formato string, por lo que debemos convertirlo a número entero usando parseInt antes de pasarlo al método findUnique.
+    where: { id },
   });
   return user;
 };
@@ -80,7 +80,7 @@ export async function PUT(
 
     //Aca actualizamos los datos mediante el id del usuario que nos llega por params y el body que nos llega por request
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: result.data, // result.data contiene los datos validados por Zod
     });
 
@@ -113,7 +113,7 @@ export async function DELETE(
 
     // Aca eliminamos el usuario mediante el id que nos llega por params
     const deletedUser = await prisma.user.delete({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     return NextResponse.json(

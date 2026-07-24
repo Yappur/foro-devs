@@ -3,6 +3,7 @@
 //NextUrl envia un monton de informacion sobre la url
 
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "./lib/auth";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl; // La porcion de una URL hacia donde se esta enviando la solicitud
@@ -13,25 +14,49 @@ export async function proxy(request: NextRequest) {
 
   console.log(`[${timestamp}] ${method} request to ${pathname}`);
 
-  if(pathname.startsWith("/api/users")){
-    if(method === "GET") {
-        console.log(`[${timestamp}] Acceso publico concedido (GET) en ${pathname}`);
-        return NextResponse.next(); // Permite que la solicitud continue la ejecucion
-    }}
+  if (pathname.startsWith("/api/users")) {
+    if (method === "GET") {
+      console.log(
+        `[${timestamp}] Acceso publico concedido (GET) en ${pathname}`,
+      );
+      return NextResponse.next(); // Permite que la solicitud continue la ejecucion
+    }
+  }
 
-    // Obtiene el encabezado de autorizacion de la solicitud
+  if (pathname.startsWith("/api/auth")) {
+    console.log(
+      `[${timestamp}] Acceso publico concedido (GET/POST) en ${pathname}`,
+    );
+    return NextResponse.next(); // Permite que la solicitud continue la ejecucion
+  }
 
-  const authHeader = request.headers.get("Authorization"); 
-  if  (!authHeader || !authHeader.startsWith("Bearer ")) {
+  // Obtiene el encabezado de autorizacion de la solicitud
+
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (!session) {
     console.warn(`[${timestamp}] Acceso no autorizado a ${pathname}`);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const token = authHeader.split(" ")[1]; // Extrae el token del encabezado de autorizacion
-  if(token!== "hola-mundo"){
-    console.warn(`[${timestamp}] Token invalido para ${pathname}`);
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  console.info(
+    `[${timestamp}] Acceso autorizado a ${pathname} para el usuario ${session.user.id}`,
+  );
+
+  // const authHeader = request.headers.get("Authorization");
+  // if  (!authHeader || !authHeader.startsWith("Bearer ")) {
+  //   console.warn(`[${timestamp}] Acceso no autorizado a ${pathname}`);
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // }
+
+  // Extrae el token del encabezado de autorizacion
+  // const token = authHeader.split(" ")[1];
+  // if(token!== "hola-mundo"){
+  //   console.warn(`[${timestamp}] Token invalido para ${pathname}`);
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // }
 
   return NextResponse.next(); // Permite que la solicitud continue la ejecucion
 }
