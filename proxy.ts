@@ -1,0 +1,43 @@
+// CUAndo alguien haga una consulta a cualquiera de nuestros endpoints, se va a ejecutar este proxy
+
+//NextUrl envia un monton de informacion sobre la url
+
+import { NextRequest, NextResponse } from "next/server";
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl; // La porcion de una URL hacia donde se esta enviando la solicitud
+  const method = request.method; // El metodo HTTP de la solicitud (GET, POST, etc.)
+  const timestamp = new Date().toLocaleTimeString(); // La fecha y hora en que se recibio la solicitud
+
+  // Imprime en la consola la informacion de la solicitud
+
+  console.log(`[${timestamp}] ${method} request to ${pathname}`);
+
+  if(pathname.startsWith("/api/users")){
+    if(method === "GET") {
+        console.log(`[${timestamp}] Acceso publico concedido (GET) en ${pathname}`);
+        return NextResponse.next(); // Permite que la solicitud continue la ejecucion
+    }}
+
+    // Obtiene el encabezado de autorizacion de la solicitud
+
+  const authHeader = request.headers.get("Authorization"); 
+  if  (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.warn(`[${timestamp}] Acceso no autorizado a ${pathname}`);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const token = authHeader.split(" ")[1]; // Extrae el token del encabezado de autorizacion
+  if(token!== "hola-mundo"){
+    console.warn(`[${timestamp}] Token invalido para ${pathname}`);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  return NextResponse.next(); // Permite que la solicitud continue la ejecucion
+}
+
+export const config = {
+  // Indica que este proxy se ejecutara para cualquier solicitud que comience con /api/
+
+  matcher: ["/api/:path*"],
+};
