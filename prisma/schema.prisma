@@ -65,14 +65,18 @@ model Post {
   authorId String
   author   User       @relation(fields: [authorId], references: [id])
 
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  @@map("post")
 }
 
 model Category {
   id    String @id @default(cuid())
   name  String
   posts Post[]
+
+  @@map("category")
 }
 
 model Session {
