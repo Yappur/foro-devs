@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./lib/auth";
+import { ratelimit } from "./lib/rate-limit";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl; // La porcion de una URL hacia donde se esta enviando la solicitud
@@ -13,6 +14,30 @@ export async function proxy(request: NextRequest) {
   // Imprime en la consola la informacion de la solicitud
 
   console.log(`[${timestamp}] ${method} request to ${pathname}`);
+
+  // Logica Redis
+
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0] ?? "anonymous";
+
+  const { success, limit, remaining, reset } = await ratelimit.limit(ip);
+
+  if (!success) {
+    console.warn(
+      `[${timestamp}] Rate limit excedido para IP ${ip} en ${pathname}`,
+    );
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": limit.toString(),
+          "X-RateLimit-Remaining": remaining.toString(),
+          "X-RateLimit-Reset": reset.toString(),
+        },
+      },
+    );
+  }
 
   if (pathname.startsWith("/api/users")) {
     if (method === "GET") {
