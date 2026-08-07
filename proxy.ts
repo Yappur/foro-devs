@@ -57,6 +57,15 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  if (pathname.startsWith("/api/posts")) {
+    if (method === "POST") {
+      console.log(
+        `[${timestamp}] Acceso publico concedido (POST) en ${pathname}`,
+      );
+      return NextResponse.next(); // Permite que la solicitud continue la ejecucion
+    }
+  }
+
   if (pathname.startsWith("/api/auth")) {
     console.log(
       `[${timestamp}] Acceso publico concedido (GET/POST) en ${pathname}`,
