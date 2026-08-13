@@ -29,7 +29,6 @@ export default function Home() {
             claros y sólidos.
           </p>
         </div>
-        // iniciar sesion con google
         <div>
           <button
             onClick={() => login("google")}
@@ -38,7 +37,6 @@ export default function Home() {
             Iniciar sesión con Google
           </button>
         </div>
-        // iniciar sesion con github
         <div>
           <button
             onClick={() => login("github")}
@@ -47,7 +45,6 @@ export default function Home() {
             Iniciar sesión con Github
           </button>
         </div>
-        // cerrar sesion
         <div>
           <button
             onClick={logout}
