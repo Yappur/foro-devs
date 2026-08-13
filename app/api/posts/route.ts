@@ -9,7 +9,7 @@ const postSchema = z.object({
     .string()
     .trim()
     .min(3, "El titulo debe tener al menos 3 caracteres")
-    .max(20, "El titulo debe tener como máximo 35 caracteres"),
+    .max(35, "El titulo debe tener como máximo 35 caracteres"),
   content: z
     .string()
     .trim()
